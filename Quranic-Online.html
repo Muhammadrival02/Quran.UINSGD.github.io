@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Meta tags yang dibutuhkan -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="Description" content="Al-Qur'an Online Dengan Terjemahan Bahasa Indonesia">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" rel="stylesheet">
+
+    <title>Al-Qur'an Online</title>
+  </head>
+  <body>
+      
+    <div id="app">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+            <a class="navbar-brand" href="#">Al-Qur'an Online</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          
+            <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+              <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                <li class="nav-item active">
+                  <a class="nav-link" href="index.html">Home <span class="sr-only">(current)</span></a>
+                </li>
+            </div>
+          </nav>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card my-5 border-0 shadow">
+                        <div class="card-header bg-success text-light">
+                            Daftar Surah
+                        </div>
+                        <div class="card-body">
+                            <div v-if="loading" class="d-flex justify-content-center">
+                                <img src="loading.svg" height="87" width="100" alt="loading" />
+                            </div>
+                            <div v-else class="table-responsive">
+                                <table class="display table" style="width:100%" id="list">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Nama Surah</th>
+                                            <th>Arti</th>
+                                            <th>Jumlah Ayat</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(data, index) in table" :key="index">
+                                            <td>{{index + 1}}</td>
+                                            <td>
+                                                <a href="#" class="text-success" data-toggle="modal" data-target="#detailModal" v-on:click="getDetail(index)">
+                                                    {{data.asma}}<br>{{data.nama}}
+                                                </a>
+                                            </td>
+                                            <td>{{data.arti}}</td>
+                                            <td>{{data.ayat}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal Detail Surat -->
+                    <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-xl">
+                            <div class="modal-content border border-success">
+                                <div class="modal-header bg-success text-light">
+                                    <h5 class="modal-title" id="detailModalLabel">Surat {{detail.nama}}</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div v-if="loading2" class="d-flex justify-content-center">
+                                        <img src="loading.svg" height="87" width="100" alt="loading" />
+                                    </div>
+                                    <div v-else>
+                                        <div class="row p-1">
+                                            <div class="col-lg-6">
+                                                <dl class="row">
+                                                    <dt class="col-sm-3">Nama</dt>
+                                                    <dd class="col-sm-9">{{detail.asma}}<br>{{detail.nama}}</dd>
+                                                    <dt class="col-sm-3">Arti</dt>
+                                                    <dd class="col-sm-9">{{detail.arti}}</dd>
+                                                    <dt class="col-sm-3">Diturunkan di</dt>
+                                                    <dd class="col-sm-9">{{detail.type}}</dd>
+                                                    <dt class="col-sm-3">Audio</dt>
+                                                    <dd class="col-sm-9">
+                                                        <audio v-bind:src="detail.audio" controls></audio>
+                                                    </dd>
+                                                    <dt class="col-sm-3">Keterangan</dt>
+                                                    <dd class="col-sm-9 border border-secondary" style="max-height: 250px; overflow-y: scroll;">
+                                                        <span v-html="detail.keterangan"></span>
+                                                    </dd>
+                                                </dl>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <h3 class="h3 underline">Bacaan Surah {{detail.nama}}</h3>
+                                                <div class="border border-success p-3" style="max-height: 450px; overflow-y: scroll;">
+                                                    <span v-for="(ayat, index) in ayats" :key="index">
+                                                        <p>
+                                                            <span class="badge badge-pill badge-success">{{detail.nomor}}:{{ayat.nomor}}</span>
+                                                            <p class="text-right">{{ayat.ar}}</p>
+                                                        </p>
+                                                        <small v-html="ayat.tr"></small><br>
+                                                        <small class="text-left font-italic">{{ayat.id}}</small>
+                                                        <hr>
+                                                    </span>
+                                                </div>
+                                                <!-- Input untuk pencarian kosa kata Arab -->
+                                                <input type="text" id="searchWord" class="form-control" placeholder="Cari kata Arab...">
+                                                <!-- Statistik pencarian kata -->
+                                                <div id="stats" class="mt-3">
+                                                    <h5>Statistik Pencarian</h5>
+                                                    <ul id="searchResults"></ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary text-light" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript yang diperlukan -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+    
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                table: [],
+                detail: [],
+                ayats: [],
+                loading: false,
+                loading2: false
+            },
+            methods: {
+                getDetail(index) {
+                    this.loading2 = true;
+                    this.$http.get('https://api.npoint.io/99c279bb173a6e28359c/data/' + index + '/').then(response => {
+                        this.getSurah(response.body.nomor);
+                        this.detail = response.body;
+                    }, response => {
+                        console.log('getDetail error ' + response);
+                    });
+                },
+                getSurah(nomor) {
+                    this.$http.get('https://api.npoint.io/99c279bb173a6e28359c/surat/' + nomor + '/').then(response => {
+                        this.ayats = response.body;
+                        this.loading2 = false;
+                        this.enableSearchWord(); // Aktifkan pencarian kosa kata Arab setelah data ayat diambil
+                    }, response => {
+                        console.log('getAyat error ' + response);
+                    });
+                },
+                enableSearchWord() {
+                    let self = this;
+                    $('#searchWord').on('keyup', function () {
+                        let value = $(this).val().toLowerCase();
+                        let results = [];
+                        let count = 0;
+
+                        // Clear previous search results
+                        $('#searchResults').empty();
+
+                        self.ayats.forEach((ayat, ayatIndex) => {
+                            if (ayat.ar.includes(value)) {
+                                results.push({
+                                    surah: self.detail.nama,
+                                    ayat: ayat.nomor,
+                                    text: ayat.ar
+                                });
+                                count++;
+                            }
+                        });
+
+                        // Tampilkan hasil pencarian dan statistik
+                        if (count > 0) {
+                            results.forEach(result => {
+                                $('#searchResults').append('<li>Kata ditemukan di Surah ' + result.surah + ', Ayat ke-' + result.ayat + '</li>');
+                            });
+                        } else {
+                            $('#searchResults').append('<li>Tidak ada kata yang ditemukan.</li>');
+                        }
+                    });
+                }
+            },
+            mounted() {
+                this.loading = true;
+                this.$http.get('https://api.npoint.io/99c279bb173a6e28359c/data/').then(response => {
+                    this.table = response.body;
+                    this.loading = false;
+                    this.$nextTick(function() {
+                        $('#list').DataTable({
+                            responsive: true
+                        });
+                    });
+                }, response => {
+                    console.log('error ' + response);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
